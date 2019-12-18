@@ -1,5 +1,5 @@
 # wxservice
-PHP版本的微信开发服务 小程序，公众号等，
+PHP版本的微信开发服务 小程序，公众号等
 致力于成为一个功能齐全 使用简单的轮子，目前功能较少，正在缓慢开发中
 
 Composer：<a href="https://packagist.org/packages/saopanda/saowx" style=" text-decoration-line: none;font-size: 14px; white-space: normal;">saopanda/saowx</a>
