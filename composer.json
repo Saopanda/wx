@@ -1,6 +1,6 @@
 {
-    "name": "saopanda/saoWx",
-    "description": "php版众平开发服务",
+    "name": "saopanda/saowx",
+    "description": "php版微信公众开发",
     "authors": [
         {
             "name": "shiliang0352",
@@ -8,12 +8,15 @@
         }
     ],
     "require":{
-	"php": ">=5.5.0"
+	    "php": ">=5.5.0",
+        "guzzlehttp/guzzle": "6.4.1"
+
     },
+
     "autoload": {
-	"psr-4": {
-	    "saoWx\\": "src"
-	}
+        "psr-4": {
+            "saowx\\": "src"
+        }
     },
     "license": "MIT"
 }
