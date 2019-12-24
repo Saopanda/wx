@@ -150,13 +150,8 @@ class saoService extends saoBasic {
         }
         $data = json_decode($data,true);
 
-        if ($data['watermark']['appid'] != $this->appid) {
-            $arr['code'] = ErrorCode::$INVALIDDATA;
-            $arr['msg'] = '加密数据不属于此app';
-            return $arr;
-        }
         unset($data['watermark']);
-
+        $data['code'] = 0;
         return $data;
     }
     

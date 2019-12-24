@@ -16,11 +16,12 @@
 //    $data['signature'] = "";
 //    $data['encryptedData'] = '';
 //    $data['iv'] = "";
-
+//
 //    $res = $wx->getUserInfo($data);
 
 
 //  接收微信消息推送 服务器验证
+
 
 
 
