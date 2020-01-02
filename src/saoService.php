@@ -12,7 +12,15 @@ class saoService extends saoBasic {
     public function checkMeidaAsync($media_url,$type=2)
     {
         $url ='https://api.weixin.qq.com/wxa/media_check_async';
-        $params['access_token'] = $this->getAccessToken();
+
+        $accessToken = $this->getAccessToken();
+        if ($accessToken['errcode'] != 0){
+            $arr['code'] = ErrorCode::$WXERROR;
+            $arr['mes'] = 'accessToken 拿取失败';
+            return $arr;
+        }
+
+        $params['access_token'] = $accessToken['access_token'];
 
         $data['media_url'] = $media_url;
         $data['media_type'] = $type;
@@ -33,7 +41,15 @@ class saoService extends saoBasic {
     public function checkPicture($file)
     {
         $url ='https://api.weixin.qq.com/wxa/img_sec_check';
-        $params['access_token'] = $this->getAccessToken();
+
+        $accessToken = $this->getAccessToken();
+        if ($accessToken['errcode'] != 0){
+            $arr['code'] = ErrorCode::$WXERROR;
+            $arr['mes'] = 'accessToken 拿取失败';
+            return $arr;
+        }
+
+        $params['access_token'] = $accessToken['access_token'];
 
         $data['media'] = $file;
 
@@ -52,7 +68,15 @@ class saoService extends saoBasic {
     public function checkMsg($msg)
     {
         $url ='https://api.weixin.qq.com/wxa/msg_sec_check';
-        $params['access_token'] = $this->getAccessToken();
+
+        $accessToken = $this->getAccessToken();
+        if ($accessToken['errcode'] != 0){
+            $arr['code'] = ErrorCode::$WXERROR;
+            $arr['mes'] = 'accessToken 拿取失败';
+            return $arr;
+        }
+
+        $params['access_token'] = $accessToken['access_token'];
 
         $data['content'] = $msg;
 
