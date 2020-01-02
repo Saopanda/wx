@@ -27,9 +27,7 @@ class saoService extends saoBasic {
 
         $rs = $this->postRequest($url,$params,$data);
 
-        $rs = json_decode($rs);
-
-        if ($rs->errcode == 0){
+        if ($rs['errcode'] == 0){
             return true;
         }else{
             return false;
@@ -54,9 +52,8 @@ class saoService extends saoBasic {
         $data['media'] = $file;
 
         $rs = $this->postRequest($url,$params,$data);
-        $rs = json_decode($rs);
 
-        if ($rs->errcode == 0){
+        if ($rs['errcode'] == 0){
             return true;
         }else{
             return false;
@@ -82,9 +79,7 @@ class saoService extends saoBasic {
 
         $rs = $this->postRequest($url,$params,$data);
 
-        $rs = json_decode($rs);
-
-        if ($rs->errcode == 0){
+        if ($rs['errcode'] == 0){
             return true;
         }else{
             return false;
