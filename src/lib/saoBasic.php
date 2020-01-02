@@ -74,7 +74,11 @@ class saoBasic {
                 $res['form_params'] = $data;
                 break;
             case "multipart":
-                $res['multipart'] = $data;
+                foreach ($data as $k => $v) {
+                    $tmp['name'] = $k;
+                    $tmp['contents'] = $v;
+                    $res['multipart'][] = $tmp;
+                }
                 break;
             case "raw":
                 $res['body'] = $data;
@@ -164,11 +168,15 @@ class saoBasic {
      * @param $url
      * @param array $params
      * @param array $data
-     * @param string $type json | raw | form_params | multipart
+     * @param string $type
+     *      json        :   以 json 格式
+     *      form_params :   application/x-www-form-urlencoded   :   表单
+     *      multipart   :   multipart/form-data                 :   多文件表单 => 文件必须是 fopen返回的资源
+     *      raw         :   原始数据
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function postRequest($url,array $params,array $data,$type='json')
+    public function postRequest($url,array $params,$data,$type='json')
     {
 
         $data = $this->buildParams($data,$type);

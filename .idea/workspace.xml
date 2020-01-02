@@ -3,6 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2db3dd60-b311-4cc2-8b5d-701c52e412bc" name="默认更改列表" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/lib/saoBasic.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/lib/saoBasic.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/saoService.php" beforeDir="false" afterPath="$PROJECT_DIR$/src/saoService.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -29,10 +30,22 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/saoService.php">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="401">
-              <caret line="78" column="63" selection-start-line="78" selection-start-column="63" selection-end-line="78" selection-end-column="63" />
+            <state relative-caret-position="129">
+              <caret line="38" column="21" lean-forward="true" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
               <folding>
                 <element signature="e#25#48#0#PHP" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/lib/saoBasic.php">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="3145">
+              <caret line="185" column="42" selection-start-line="185" selection-start-column="42" selection-end-line="185" selection-end-column="42" />
+              <folding>
+                <element signature="e#29#51#0#PHP" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -78,7 +91,8 @@
     </include_path>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="y" value="23" />
+    <option name="x" value="149" />
+    <option name="y" value="37" />
     <option name="width" value="1345" />
     <option name="height" value="847" />
   </component>
@@ -87,7 +101,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -104,6 +117,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -148,7 +162,8 @@
       <workItem from="1576638395172" duration="9153000" />
       <workItem from="1577180362263" duration="1834000" />
       <workItem from="1577239618068" duration="2000" />
-      <workItem from="1577949611049" duration="1935000" />
+      <workItem from="1577949611049" duration="4161000" />
+      <workItem from="1577961044323" duration="11000" />
     </task>
     <task id="LOCAL-00001" summary="优化代码 增加errcode">
       <created>1577181050537</created>
@@ -164,22 +179,36 @@
       <option name="project" value="LOCAL" />
       <updated>1577950945787</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="fix bug">
+      <created>1577952139011</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1577952139011</updated>
+    </task>
+    <task id="LOCAL-00004" summary="fix bug">
+      <created>1577953075572</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1577953075572</updated>
+    </task>
+    <option name="localTasksCounter" value="5" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="61813000" />
+    <option name="totallyTimeSpent" value="64050000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1345" height="847" extended-state="0" />
+    <frame x="149" y="37" width="1345" height="847" extended-state="0" />
     <editor active="true" />
     <layout>
       <window_info id="Favorites" order="0" side_tool="true" />
-      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.22256331" />
+      <window_info active="true" content_ui="combo" id="Project" order="1" visible="true" weight="0.22563316" />
       <window_info id="Structure" order="2" side_tool="true" weight="0.25" />
       <window_info anchor="bottom" id="Terminal" order="0" />
       <window_info anchor="bottom" id="Database Changes" order="1" />
-      <window_info anchor="bottom" id="Event Log" order="2" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="2" side_tool="true" weight="0.32980132" />
       <window_info anchor="bottom" id="Version Control" order="3" />
       <window_info anchor="bottom" id="调试" order="4" />
       <window_info anchor="bottom" id="Docker" order="5" show_stripe_button="false" />
@@ -201,7 +230,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="优化代码 增加errcode" />
-    <option name="LAST_COMMIT_MESSAGE" value="优化代码 增加errcode" />
+    <MESSAGE value="fix bug" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix bug" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/vendor/guzzlehttp/guzzle/src/HandlerStack.php">
@@ -252,13 +282,6 @@
     <entry file="file://$PROJECT_DIR$/test/666.txt" />
     <entry file="file://$PROJECT_DIR$/src/lib/666.txt" />
     <entry file="file://$PROJECT_DIR$/test/123.html" />
-    <entry file="file://$PROJECT_DIR$/src/lib/ErrorCode.php">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="646">
-          <caret line="38" column="26" selection-start-line="38" selection-start-column="18" selection-end-line="38" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/lib/access_token">
       <provider selected="true" editor-type-id="text-editor">
         <state>
@@ -287,10 +310,17 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/lib/ErrorCode.php">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="646">
+          <caret line="38" column="26" selection-start-line="38" selection-start-column="18" selection-end-line="38" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/lib/saoBasic.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="205">
-          <caret line="108" column="20" selection-start-line="108" selection-start-column="20" selection-end-line="108" selection-end-column="20" />
+        <state relative-caret-position="3145">
+          <caret line="185" column="42" selection-start-line="185" selection-start-column="42" selection-end-line="185" selection-end-column="42" />
           <folding>
             <element signature="e#29#51#0#PHP" expanded="true" />
           </folding>
@@ -299,8 +329,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/saoService.php">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="401">
-          <caret line="78" column="63" selection-start-line="78" selection-start-column="63" selection-end-line="78" selection-end-column="63" />
+        <state relative-caret-position="129">
+          <caret line="38" column="21" lean-forward="true" selection-start-line="38" selection-start-column="21" selection-end-line="38" selection-end-column="21" />
           <folding>
             <element signature="e#25#48#0#PHP" expanded="true" />
           </folding>

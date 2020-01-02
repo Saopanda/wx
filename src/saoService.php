@@ -8,7 +8,7 @@ use saowx\lib\WXBizDataCrypt;
 
 class saoService extends saoBasic {
 
-    //  微信 媒体内容安全
+    //  微信媒体内容安全    异步
     public function checkMeidaAsync($media_url,$type=2)
     {
         $url ='https://api.weixin.qq.com/wxa/media_check_async';
@@ -34,8 +34,11 @@ class saoService extends saoBasic {
         }
     }
 
-
-    //  微信 图片安全
+    /**
+     * 微信图片安全   同步
+     * @param $file  文件路径 可以是临时路径
+     * @return bool
+     */
     public function checkPicture($file)
     {
         $url ='https://api.weixin.qq.com/wxa/img_sec_check';
@@ -49,9 +52,9 @@ class saoService extends saoBasic {
 
         $params['access_token'] = $accessToken['access_token'];
 
-        $data['media'] = $file;
+        $data['media'] = fopen($file,'r');
 
-        $rs = $this->postRequest($url,$params,$data);
+        $rs = $this->postRequest($url,$params,$data,'multipart');
 
         if ($rs['errcode'] == 0){
             return true;
@@ -61,7 +64,11 @@ class saoService extends saoBasic {
     }
 
 
-    //  微信 文字安全
+    /**
+     * 微信文字安全   同步
+     * @param $msg   待检查文字
+     * @return bool
+     */
     public function checkMsg($msg)
     {
         $url ='https://api.weixin.qq.com/wxa/msg_sec_check';
@@ -76,8 +83,10 @@ class saoService extends saoBasic {
         $params['access_token'] = $accessToken['access_token'];
 
         $data['content'] = $msg;
+        $data = json_encode($data,JSON_UNESCAPED_UNICODE);
 
-        $rs = $this->postRequest($url,$params,$data);
+        //  中文会被转义 自己 json_encode 使用 raw 发送
+        $rs = $this->postRequest($url,$params,$data,'raw');
 
         if ($rs['errcode'] == 0){
             return true;
@@ -234,6 +243,6 @@ class saoService extends saoBasic {
         $data['code'] = 0;
         return $data;
     }
-    
+
 
 }
