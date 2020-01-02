@@ -35,10 +35,7 @@ class saoBasic {
     {
         $this->appid = $appid;
         $this->secret = $secret;
-
-        $this->client = new Client([
-            'timeout' => '3'
-        ]);
+        $this->client = new Client();
     }
 
     /**

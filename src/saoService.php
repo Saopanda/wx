@@ -8,6 +8,67 @@ use saowx\lib\WXBizDataCrypt;
 
 class saoService extends saoBasic {
 
+    //  微信 媒体内容安全
+    public function checkMeidaAsync($media_url,$type=2)
+    {
+        $url ='https://api.weixin.qq.com/wxa/media_check_async';
+        $params['access_token'] = $this->getAccessToken();
+
+        $data['media_url'] = $media_url;
+        $data['media_type'] = $type;
+
+        $rs = $this->postRequest($url,$params,$data);
+
+        $rs = json_decode($rs);
+
+        if ($rs->errcode == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+    //  微信 图片安全
+    public function checkPicture($file)
+    {
+        $url ='https://api.weixin.qq.com/wxa/img_sec_check';
+        $params['access_token'] = $this->getAccessToken();
+
+        $data['media'] = $file;
+
+        $rs = $this->postRequest($url,$params,$data);
+        $rs = json_decode($rs);
+
+        if ($rs->errcode == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+    //  微信 文字安全
+    public function checkMsg($msg)
+    {
+        $url ='https://api.weixin.qq.com/wxa/msg_sec_check';
+        $params['access_token'] = $this->getAccessToken();
+
+        $data['content'] = $msg;
+
+        $rs = $this->postRequest($url,$params,$data);
+
+        $rs = json_decode($rs);
+
+        if ($rs->errcode == 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
+
+
     /**
      * 微信消息推送 验证服务器
      *
