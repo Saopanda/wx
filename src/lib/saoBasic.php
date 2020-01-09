@@ -20,6 +20,32 @@ class saoBasic {
     protected $secret;
 
     /**
+     * 商户号 $mchid
+     * @var
+     */
+    protected $mchid;
+
+    /**
+     * 商户秘钥 $mchkey
+     * @var
+     */
+    protected $mchkey;
+
+
+    /**
+     * 商户证书 $cert
+     * @var
+     */
+    protected $cert;
+
+
+    /**
+     * 商户证书秘钥 $key
+     * @var
+     */
+    protected $key;
+
+    /**
      * http 客户端
      * @GuzzleHttp
      * @var Client
@@ -27,14 +53,34 @@ class saoBasic {
     protected $client;
 
     /**
+     * 微信支付商户回调地址
+     * @var
+     */
+    protected $notify_url;
+
+    /**
      * 用 appid 和 secret 实例化
-     * @param $appid
+     * @param $data
+     *      $data['appid']
+     *      $data['secret']
+     * 以下在使用微信支付时需要
+     *      $data['mchid']
+     *      $data['mchkey']
+     *      $data['notify_url']  回调地址
+     *      $data['cert']  商户支付证书  apiclient_cert.pem
+     *      $data['key']  商户支付证书  apiclient_key.pem
      * @param $secret
      */
-    public function __construct($appid,$secret)
+    public function __construct(array $data)
     {
-        $this->appid = $appid;
-        $this->secret = $secret;
+        if ( !isset($data['appid']) ||  !isset($data['secret'])) {
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '参数不对';
+            return $arr;
+        }
+        foreach ($data as $k =>$v) {
+            $this->$k = $v;
+        }
         $this->client = new Client();
     }
 
@@ -62,11 +108,16 @@ class saoBasic {
     /**
      * 构建 请求数据
      */
-    public function buildParams($data,$type)
+    public function buildParams($data,$type,$cert,$key)
     {
         $data = $this->objectToArray($data);
+        if (!is_null($cert)){
+            $res['cert'] = $cert;
+        }
+        if (!is_null($key)){
+            $res['ssl_key'] = $key;
+        }
         switch ($type) {
-
             case "json":
                 $res['json'] = $data;
                 break;
@@ -87,7 +138,6 @@ class saoBasic {
                 $res['body'] = $data;
                 break;
         }
-
         return $res;
     }
 
@@ -127,6 +177,10 @@ class saoBasic {
         $params['secret'] = $this->secret;
 
         $res = $this->getRequest($url,$params);
+        if (!is_array($res)){
+            $res = json_decode($res,true);
+        }
+
         if (!isset($res['errcode'])){
             $res['errcode'] = 0;
             $res['timestamp'] = time();
@@ -149,7 +203,7 @@ class saoBasic {
 
             $url = $this->buildUrl($url,$params);
             $res = $this->client->request('get',$url);
-            return json_decode($res->getBody()->getContents(),true);
+            return $res->getBody()->getContents();
 
         }catch(RequestException $exception){
 
@@ -173,18 +227,22 @@ class saoBasic {
      *      form_params :   application/x-www-form-urlencoded   :   表单
      *      multipart   :   multipart/form-data                 :   多文件表单 => 文件必须是 fopen返回的资源
      *      raw         :   原始数据
+     * @param array $cert
+     *      ['/path/123.pem','password'] || '/path/123.pem'
+     * @param array $key
+     *      ['/path/123.pem','password'] || '/path/123.pem'
      * @return mixed
      * @throws \GuzzleHttp\Exception\GuzzleException
      */
-    public function postRequest($url,array $params,$data,$type='json')
+    public function postRequest($url,array $params,$data,$type='json',$cert=null,$key=null)
     {
-
-        $data = $this->buildParams($data,$type);
-
+        $data = $this->buildParams($data,$type,$cert,$key);
+        var_dump($data);
         try {
             $url = $this->buildUrl($url,$params);
             $res = $this->client->request('post',$url,$data);
-            return json_decode($res->getBody()->getContents(),true);
+
+            return $res->getBody()->getContents();
 
         }catch(RequestException $exception){
 
@@ -195,9 +253,68 @@ class saoBasic {
         }
     }
 
+    /**
+     * 随机字符串
+     * @param int $a
+     * @return string
+     */
+    public function nonce_str($a=32){
+        $result = '';
+        $str = 'QWERTYUIOPASDFGHJKLZXVBNMqwertyuioplkjhgfdsamnbvcxz';
+        for ($i=0;$i<$a;$i++){
+            $result .= $str[mt_rand(0,48)];
+        }
+        return $result;
+    }
 
+    /**
+     * xml 转数组
+     * @param $xml
+     * @return mixed
+     */
+    public function xmlToArray($xml)
+    {
+        libxml_disable_entity_loader(true);
+        $values = json_decode(json_encode(simplexml_load_string($xml, 'SimpleXMLElement', LIBXML_NOCDATA)), true);
+        return $values;
+    }
 
+    /**
+     * 数组转换xml
+     * @param $arr
+     * @return string
+     */
+    public function arrayToXml($arr)
+    {
+        $xml = "<xml>";
+        foreach ($arr as $key=>$val)
+        {
+            if (is_numeric($val)){
+                $xml.="<".$key.">".$val."</".$key.">";
+            }else{
+                $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
+            }
+        }
+        $xml.="</xml>";
+        return $xml;
+    }
 
+    /**
+     * 微信商户签名函数
+     * @param $data
+     * @return string
+     */
+    public function mchSign($data){
+        $stringA = '';
+        ksort($data);
+        foreach ($data as $key=>$value){
+            if(!$value) continue;
+            if($stringA) $stringA .= '&'.$key."=".$value;
+            else $stringA = $key."=".$value;
+        }
+        $stringSignTemp = $stringA.'&key='.$this->mchkey;
+        return strtoupper(md5($stringSignTemp));
+    }
 
 
 

@@ -8,6 +8,160 @@ use saowx\lib\WXBizDataCrypt;
 
 class saoService extends saoBasic {
 
+    /**
+     * 微信支付统一下单
+     * @param $data
+     *      $data['body']       商品描述
+     *      $data['total_fee']      费用
+     *      $data['out_trade_no']       订单号
+     *      $data['openid']         收款人
+     * 以下选填
+     *      $data['notify_url']     使用不同的回调地址
+     *      $data['appid']          使用不同的appid
+     *      $data['trade_type']     默认小程序支付
+     *      $data['spbill_create_ip']   发起支付 ip
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function wxOrder($data)
+    {
+        if ($this->mchid == null || $this->mchkey == null){
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '微信商户未被实例化';
+            return $arr;
+        }
+        if ( !isset($data['body']) ||  !isset($data['total_fee']) ||  !isset($data['out_trade_no']) || !isset($data['openid'])) {
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '参数不对';
+            return $arr;
+        }
+        if (!isset($data['appid'])){
+            $data['appid'] = $this->appid;
+        }
+        if (!isset($data['notify_url'])){
+            $data['notify_url'] = $this->notify_url;
+        }
+        if (!isset($data['trade_type'])){
+            $data['trade_type'] = 'JSAPI';
+        }
+        if (!isset($data['spbill_create_ip'])){
+            $data['spbill_create_ip'] = '1.1.1.1';
+        }
+        $data['mch_id'] = $this->mchid;
+        $data['nonce_str'] = $this->nonce_str();
+        $data['sign'] = $this->mchSign($data);
+        $data = $this->arrayToXml($data);
+
+        $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
+
+        $rs = $this->postRequest($url,[],$data,'raw');
+        if (!is_array($rs)){
+            $rs = $this->xmlToArray($rs);
+        }
+        return $rs;
+    }
+
+    /**
+     * 微信支付 发送公众号红包
+     * @param $data
+     *      $data['mch_billno']     订单号
+     *      $data['act_name']       活动名称
+     *      $data['send_name']     发送者名称
+     *      $data['re_openid']     接收红包的openid
+     *      $data['total_amount']    红包金额 单位分 整数
+     *      $data['wishing']        红包祝福语
+     *      $data['remark']         备注
+     *  以下可选
+     *      $data['wxappid']        应用 appid
+     *      $data['scene_id']       场景 id 红包大于200小于1元时需要
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function redpackToUser($data)
+    {
+        if ($this->mchid == null || $this->mchkey == null || $this->cert == null || $this->key == null){
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '微信商户未被实例化 (包含证书)';
+            return $arr;
+        }
+        if ( !isset($data['mch_billno']) ||  !isset($data['send_name']) ||  !isset($data['re_openid']) || !isset
+        ($data['total_amount']) || !isset($data['wishing']) || !isset($data['remark'])) {
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '参数不对';
+            return $arr;
+        }
+
+        if (!isset($data['wxappid'])){
+            $data['wxappid'] = $this->appid;
+        }
+
+        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack';
+
+        $data['mch_id'] = $this->mchid;
+        $data['client_ip'] = '1.1.1.1';
+        $data['total_num'] = 1;
+        $data['nonce_str'] = $this->nonce_str();
+        $data['sign'] = $this->mchSign($data);
+        $data = $this->arrayToXml($data);
+
+        $rs = $this->postRequest($url,[],$data,'raw','/home/code/apiclient_cert.pem','/home/code/apiclient_key.pem');
+
+        if (!is_array($rs)){
+            $rs = $this->xmlToArray($rs);
+        }
+        return $rs;
+    }
+
+
+    /**
+     * 企业付款到零钱
+     * @param $data
+     *      $data['partner_trade_no']       订单号
+     *      $data['openid']                 收钱用户
+     *      $data['amount']                 金额
+     *      $data['desc']                   打款备注
+     * 以下非必填
+     *      $data['mch_appid']              应用 appid
+     * @return mixed
+     * @throws \GuzzleHttp\Exception\GuzzleException
+     */
+    public function costToUser($data)
+    {
+        if ($this->mchid == null || $this->mchkey == null || $this->cert == null || $this->key == null){
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '微信商户未被实例化 (包含证书)';
+            return $arr;
+        }
+
+        if ( !isset($data['partner_trade_no']) ||  !isset($data['openid']) || !isset
+            ($data['amount']) || !isset($data['desc'])) {
+            $arr['code'] = ErrorCode::$FIELDLACK;
+            $arr['mes'] = '参数不对';
+            return $arr;
+        }
+
+        if (!isset($data['mch_appid'])){
+            $data['mch_appid'] = $this->appid;
+        }
+
+        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
+
+        $data['mchid'] = $this->mchid;
+        $data['spbill_create_ip'] = '1.1.1.1';
+        $data['check_name'] = 'NO_CHECK';
+        $data['nonce_str'] = $this->nonce_str();
+        $data['sign'] = $this->mchSign($data);
+        $data = $this->arrayToXml($data);
+
+        $rs = $this->postRequest($url,[],$data,'raw',$this->cert,$this->key);
+
+        if (!is_array($rs)){
+            $rs = $this->xmlToArray($rs);
+        }
+        return $rs;
+
+    }
+
     //  微信媒体内容安全    异步
     public function checkMeidaAsync($media_url,$type=2)
     {
@@ -26,6 +180,10 @@ class saoService extends saoBasic {
         $data['media_type'] = $type;
 
         $rs = $this->postRequest($url,$params,$data);
+
+        if (!is_array($rs)){
+            $rs = json_decode($rs,true);
+        }
 
         if ($rs['errcode'] == 0){
             return true;
@@ -55,6 +213,9 @@ class saoService extends saoBasic {
         $data['media'] = fopen($file,'r');
 
         $rs = $this->postRequest($url,$params,$data,'multipart');
+        if (!is_array($rs)){
+            $rs = json_decode($rs,true);
+        }
 
         if ($rs['errcode'] == 0){
             return true;
@@ -87,6 +248,9 @@ class saoService extends saoBasic {
 
         //  中文会被转义 自己 json_encode 使用 raw 发送
         $rs = $this->postRequest($url,$params,$data,'raw');
+        if (!is_array($rs)){
+            $rs = json_decode($rs,true);
+        }
 
         if ($rs['errcode'] == 0){
             return true;
@@ -94,7 +258,6 @@ class saoService extends saoBasic {
             return false;
         }
     }
-
 
 
     /**
@@ -176,7 +339,12 @@ class saoService extends saoBasic {
             ],
         ],$data);
 
-        return  $this->postRequest($url,$params,$mes);
+        $rs = $this->postRequest($url,$params,$mes);
+        if (!is_array($rs)){
+            $rs = json_decode($rs,true);
+        }
+
+        return $rs;
 
     }
 
@@ -197,6 +365,10 @@ class saoService extends saoBasic {
         $params['grant_type'] = 'authorization_code';
 
         $res = $this->getRequest($url,$params);
+        if (!is_array($res)){
+            $res = json_decode($res,true);
+        }
+
 
         (isset($res['errcode'])) ? : $res['errcode'] = ErrorCode::$OK;
 
