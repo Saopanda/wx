@@ -26,11 +26,13 @@ class saoService extends saoBasic {
     public function wxOrder($data)
     {
         if ($this->mchid == null || $this->mchkey == null){
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '微信商户未被实例化';
             return $arr;
         }
         if ( !isset($data['body']) ||  !isset($data['total_fee']) ||  !isset($data['out_trade_no']) || !isset($data['openid'])) {
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '参数不对';
             return $arr;
@@ -85,12 +87,14 @@ class saoService extends saoBasic {
     public function redpackToUser($data)
     {
         if ($this->mchid == null || $this->mchkey == null || $this->cert == null || $this->key == null){
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '微信商户未被实例化 (包含证书)';
             return $arr;
         }
         if ( !isset($data['mch_billno']) ||  !isset($data['send_name']) ||  !isset($data['re_openid']) || !isset
-        ($data['total_amount']) || !isset($data['wishing']) || !isset($data['remark'])) {
+            ($data['total_amount']) || !isset($data['wishing']) || !isset($data['remark'])) {
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '参数不对';
             return $arr;
@@ -137,6 +141,7 @@ class saoService extends saoBasic {
     public function costToUser($data)
     {
         if ($this->mchid == null || $this->mchkey == null || $this->cert == null || $this->key == null){
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '微信商户未被实例化 (包含证书)';
             return $arr;
@@ -144,6 +149,7 @@ class saoService extends saoBasic {
 
         if ( !isset($data['partner_trade_no']) ||  !isset($data['openid']) || !isset
             ($data['amount']) || !isset($data['desc'])) {
+            $arr['return_code'] = 'FAIL';
             $arr['code'] = ErrorCode::$FIELDLACK;
             $arr['mes'] = '参数不对';
             return $arr;
