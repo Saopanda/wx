@@ -237,7 +237,6 @@ class saoBasic {
     public function postRequest($url,array $params,$data,$type='json',$cert=null,$key=null)
     {
         $data = $this->buildParams($data,$type,$cert,$key);
-        var_dump($data);
         try {
             $url = $this->buildUrl($url,$params);
             $res = $this->client->request('post',$url,$data);
