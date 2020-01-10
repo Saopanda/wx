@@ -55,8 +55,13 @@ class saoService extends saoBasic {
         $url = 'https://api.mch.weixin.qq.com/pay/unifiedorder';
 
         $rs = $this->postRequest($url,[],$data,'raw');
+
         if (!is_array($rs)){
             $rs = $this->xmlToArray($rs);
+        }
+        if (isset($rs['errcode'])) {
+            $rs['return_code'] = 'FAIL';
+            $rs['return_msg'] = '网络连接故障';
         }
         return $rs;
     }
@@ -109,6 +114,10 @@ class saoService extends saoBasic {
         if (!is_array($rs)){
             $rs = $this->xmlToArray($rs);
         }
+        if (isset($rs['errcode'])) {
+            $rs['return_code'] = 'FAIL';
+            $rs['return_msg'] = '网络连接故障';
+        }
         return $rs;
     }
 
@@ -157,6 +166,10 @@ class saoService extends saoBasic {
 
         if (!is_array($rs)){
             $rs = $this->xmlToArray($rs);
+        }
+        if (isset($rs['errcode'])) {
+            $rs['return_code'] = 'FAIL';
+            $rs['return_msg'] = '网络连接故障';
         }
         return $rs;
 
