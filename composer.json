@@ -8,9 +8,7 @@
         }
     ],
     "require":{
-	    "php": ">=5.5.0",
-        "guzzlehttp/guzzle": "6.4.1"
-
+	    "php": ">=7.0.0"
     },
 
     "autoload": {
