@@ -7,10 +7,14 @@
  */
 namespace saowx\lib;
 
-use saowx\lib\ErrorCode;
-
 class WXBizDataCrypt
 {
+    static $OK = 0;
+    static $IllegalAesKey = -41001;
+    static $IllegalIv = -41002;
+    static $IllegalBuffer = -41003;
+    static $DecodeBase64Error = -41004;
+
     private $appid;
 	private $sessionKey;
 
@@ -37,13 +41,13 @@ class WXBizDataCrypt
 	public function decryptData( $encryptedData, $iv, &$data )
 	{
 		if (strlen($this->sessionKey) != 24) {
-			return ErrorCode::$IllegalAesKey;
+			return self::$IllegalAesKey;
 		}
 		$aesKey=base64_decode($this->sessionKey);
 
         
 		if (strlen($iv) != 24) {
-			return ErrorCode::$IllegalIv;
+			return self::$IllegalIv;
 		}
 		$aesIV=base64_decode($iv);
 
@@ -54,14 +58,14 @@ class WXBizDataCrypt
 		$dataObj=json_decode( $result );
 		if( $dataObj  == NULL )
 		{
-			return ErrorCode::$IllegalBuffer;
+			return self::$IllegalBuffer;
 		}
 		if( $dataObj->watermark->appid != $this->appid )
 		{
-			return ErrorCode::$IllegalBuffer;
+			return self::$IllegalBuffer;
 		}
 		$data = $result;
-		return ErrorCode::$OK;
+		return self::$OK;
 	}
 
 }

@@ -23,16 +23,10 @@ namespace saowx\lib;
  *    <li>-41016: base64解密失败</li>
  * </ul>
  */
-class ErrorCode
+class ErrorClass
 {
-	public static $OK = 0;
-	public static $IllegalAesKey = -41001;
-	public static $IllegalIv = -41002;
-	public static $IllegalBuffer = -41003;
-	public static $DecodeBase64Error = -41004;
-
-
-    public static $CLIENT = 90000;
+    public static $status;
+    public static $CLIENT = 50009;
     public static $SIGN = 96102;
     public static $INVALIDDATA = 96103;
     public static $FIELDLACK = 96104;
