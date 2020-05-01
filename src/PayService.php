@@ -27,6 +27,8 @@ class PayService extends SaoBasic
     }
 
     /**
+     * 微信统一下单
+     *
      * @param $openid       //  谁的订单
      * @param $body         //  什么东西
      * @param $total_fee    //  多少钱
@@ -65,6 +67,8 @@ class PayService extends SaoBasic
     }
 
     /**
+     * 企业付款到零钱
+     *
      * @param $openid           //  转给谁
      * @param $amount           //  多少钱
      * @param $desc             //  转款说明
@@ -97,6 +101,8 @@ class PayService extends SaoBasic
 
         $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/promotion/transfers';
         $data = [ 'raw' => $data ];
+        $data['pem'] = $this->mchCert;
+        $data['pem_key'] = $this->mchCertKey;
 
         $res = Clinet::new()->post($url,$data);
 
@@ -105,5 +111,60 @@ class PayService extends SaoBasic
         }
         return $res;
 
+    }
+
+    /**
+     * 发放现金红包
+     *
+     * @param $openid           //  发给谁
+     * @param $amount           //  金额
+     * @param $desc             //  红包祝福语
+     * @param $send_name        //  谁发的
+     * @param $act_name         //  活动名称
+     * @param $remark           //  备注
+     * @param $mch_billno       //  订单号
+     * @param $m_params         //  可选参数 见微信支付文档
+     * @param array $m_params
+     * @return array|mixed|\stdClass
+     */
+    public function redpackToUser($openid,$amount,$desc,$send_name,$act_name,$remark,$mch_billno,array
+    $m_params=array())
+    {
+        if (is_file($this->mchCert) || is_file($this->mchCertKey)){
+            $this->result->E_code = 50042;
+            $this->result->E_msg = '证书不存在';
+            return $this->result;
+        }
+
+        $data = [
+            're_openid'=>$openid,
+            'total_amount'=>$amount,
+            'wishing'=>$desc,
+            'send_name'=>$send_name,
+            'act_name'=>$act_name,
+            'remark'=>$remark,
+            'mch_billno'=>$mch_billno,
+            'wxappid'=>$this->appid,
+            'mch_id'=>$this->mchId,
+            'nonce_str'=>$this->nonce_str(),
+            'check_name'=>'NO_CHECK',
+            'client_ip'=>'1.1.1.1',
+            'total_num'=>1,
+        ];
+        $data = array_merge($data,$m_params);
+        $data['sign'] = $this->mchSign($data,$this->mchKey);
+        $data = $this->arrayToXml($data);
+
+        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack';
+        $data = [ 'raw' => $data ];
+        $data['pem'] = $this->mchCert;
+        $data['pem_key'] = $this->mchCertKey;
+
+        $res = Clinet::new()->post($url,$data);
+
+        if ($res->E_code == 0) {
+            $res->data = $this->xmlToArray($res->data);
+        }
+        return $res;
     }
 }

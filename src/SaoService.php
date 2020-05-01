@@ -13,12 +13,14 @@ class SaoService {
      * 实例化小程序
      * @param $appid
      * @param $secret
+     * @param $messageToken
+     * @param $messageKey
      * @return AppService
      */
-    static function app($appid,$secret)
+    static function app($appid,$secret,$messageToken=null,$messageKey=null)
     {
         if (is_null(self::$app)){
-            self::$app = new AppService($appid,$secret);
+            self::$app = new AppService($appid,$secret,$messageToken,$messageKey);
         }
         return self::$app;
     }
@@ -40,63 +42,6 @@ class SaoService {
             self::$pay = new PayService($appid,$mchId,$mchKey,$notify_url,$trade_type,$mchCert,$mchCertKey);
         }
         return self::$pay;
-    }
-
-    /**
-     * 微信支付 发送公众号红包
-     * @param $data
-     *      $data['mch_billno']     订单号
-     *      $data['act_name']       活动名称
-     *      $data['send_name']     发送者名称
-     *      $data['re_openid']     接收红包的openid
-     *      $data['total_amount']    红包金额 单位分 整数
-     *      $data['wishing']        红包祝福语
-     *      $data['remark']         备注
-     *  以下可选
-     *      $data['wxappid']        应用 appid
-     *      $data['scene_id']       场景 id 红包大于200小于1元时需要
-     * @return mixed
-     * @throws \GuzzleHttp\Exception\GuzzleException
-     */
-    public function redpackToUser($data)
-    {
-        if ($this->mchid == null || $this->mchkey == null || $this->cert == null || $this->key == null){
-            $arr['return_code'] = 'FAIL';
-            $arr['code'] = ErrorCode::$FIELDLACK;
-            $arr['mes'] = '微信商户未被实例化 (包含证书)';
-            return $arr;
-        }
-        if ( !isset($data['mch_billno']) ||  !isset($data['send_name']) ||  !isset($data['re_openid']) || !isset
-            ($data['total_amount']) || !isset($data['wishing']) || !isset($data['remark'])) {
-            $arr['return_code'] = 'FAIL';
-            $arr['code'] = ErrorCode::$FIELDLACK;
-            $arr['mes'] = '参数不对';
-            return $arr;
-        }
-
-        if (!isset($data['wxappid'])){
-            $data['wxappid'] = $this->appid;
-        }
-
-        $url = 'https://api.mch.weixin.qq.com/mmpaymkttransfers/sendredpack';
-
-        $data['mch_id'] = $this->mchid;
-        $data['client_ip'] = '1.1.1.1';
-        $data['total_num'] = 1;
-        $data['nonce_str'] = $this->nonce_str();
-        $data['sign'] = $this->mchSign($data);
-        $data = $this->arrayToXml($data);
-
-        $rs = $this->postRequest($url,[],$data,'raw','/home/code/apiclient_cert.pem','/home/code/apiclient_key.pem');
-
-        if (!is_array($rs)){
-            $rs = $this->xmlToArray($rs);
-        }
-        if (isset($rs['errcode'])) {
-            $rs['return_code'] = 'FAIL';
-            $rs['return_msg'] = '网络连接故障';
-        }
-        return $rs;
     }
 
 

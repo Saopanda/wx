@@ -4,10 +4,10 @@
     use saowx\SaoService;
 
 
-    $app = SaoService::app(
-        '111',
-        '111'
-        );
+//    $app = SaoService::app(
+//        '111',
+//        '111'
+//        );
 
 #   小程序登陆
 //    $res = $app->login('081lgZd51GGY8R1ZsYf51Re0e51lgZdg');
@@ -43,13 +43,15 @@
 //    header('Content-Type: image/png');
 //    echo $res->data;
 
+
+
 #   微信支付统一下单
-    $pay = SaoService::pay(
-        '111',
-        '111',
-        '111',
-        '666.com'
-    );
+//    $pay = SaoService::pay(
+//        '111',
+//        '111',
+//        '111',
+//        '666.com'
+//    );
 
 //    $rs = $pay->order(
 //        'ozOFO5YT26As460BBuo40-riDdZg',
@@ -58,14 +60,23 @@
 //        'efqdqwd'
 //    );
 
-    $rs = $pay->costToUser(
-        '',
-        '',
-        '',
-        '',
-    );
+//    $rs = $pay->costToUser(
+//        '',
+//        '',
+//        '',
+//        ''
+//    );
 
+//    $app = SaoService::app('1','2');
+//
+//    $rs = $app->message()->send();
+
+    $rs = date('Y-m-d H:i:s',strtotime('14aaaa:12'));
     var_dump($rs);
+
+
+
+
 
 //    $res = $app->test();
 //

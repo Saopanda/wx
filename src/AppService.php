@@ -8,17 +8,29 @@ use saowx\lib\Clinet;
 
 class AppService extends SaoBasic
 {
-    protected $appid,$secret;
+    protected $appid,$secret,$result,$messageToken,$messageKey;
 
     #   小程序登陆
     protected $url = 'https://api.weixin.qq.com/sns';
     #   内容审查
     protected $url2 = 'https://api.weixin.qq.com/wxa';
 
-    public function __construct($appid,$secret)
+    public function __construct($appid,$secret,$messageToken,$messageKey)
     {
         $this->appid = $appid;
         $this->secret = $secret;
+        $this->messageToken = $messageToken;
+        $this->messageKey = $messageKey;
+        $this->result = new \stdClass();
+    }
+
+    //  微信消息服务入口 待完成
+    public function message()
+    {
+        if (is_null($this->messageToken) ||is_null($this->messageKey) ){
+            return $this;
+        }
+        return  MesService::new($this->messageToken,$this->messageKey);
     }
 
     /**
@@ -28,7 +40,7 @@ class AppService extends SaoBasic
      */
     public function login($code)
     {
-        $url = $this->url.'/jscode2session';
+         $url = $this->url.'/jscode2session';
         require_once '';
         $params = [
             'appid'=>$this->appid,
@@ -53,7 +65,7 @@ class AppService extends SaoBasic
     {
         //  数据签名校验
         $server_signature = sha1($rawData.$session_key);
-        $result = new \stdClass();
+        $result = $this->result;
         if ($server_signature != $signature) {
             $result->E_code = '50011';
             $result->E_msg = '签名验证失败';
