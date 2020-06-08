@@ -40,8 +40,7 @@ class AppService extends SaoBasic
      */
     public function login($code)
     {
-         $url = $this->url.'/jscode2session';
-        require_once '';
+        $url = $this->url.'/jscode2session';
         $params = [
             'appid'=>$this->appid,
             'secret'=>$this->secret,
