@@ -1,3 +1,4 @@
 /vendor/
-composer.lock
 /test/
+/src/lib/access_token
+/.github/

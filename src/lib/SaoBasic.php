@@ -4,6 +4,16 @@ namespace saowx\lib;
 
 class SaoBasic {
 
+    //  文件流转文件
+    public function saveToFile($string,$path,$name=null)
+    {
+        $name=null ? $name="file_".uniqid():$name;
+        $file = fopen("./".$path.$name,"w");
+        fwrite($file,$string);
+        fclose($file);
+        return $path.$name;
+    }
+
     /**
      * 获取 access_token
      * @param $appid
@@ -15,40 +25,41 @@ class SaoBasic {
     {
         $rs = @file_get_contents(dirname(__FILE__).'/access_token');
         $rs = json_decode($rs);
+        $result = $this->result;
 
         if (isset($rs->expires_time) && !$refresh) {
             if ($rs->expires_time > time()+120) {
-                return $rs;
+                $result->DATA = $rs;
+                $result->E_code = 0;
+                return $result;
             }
         }
 
         $url = 'https://api.weixin.qq.com/cgi-bin/token';
         $params = [
-                'grant_type'=>'client_credential',
-                'appid'=>$appid,
-                'secret'=>$secret,
-            ];
+            'grant_type'=>'client_credential',
+            'appid'=>$appid,
+            'secret'=>$secret,
+        ];
 
         $res = Clinet::new()->get($url,$params);
         if ($res->E_code != 0) {
             return $res;
         }
         //  通讯成功
-        $res = json_decode($res->data);
-        if (isset($res->errcode)){
-            $res->E_code = $res->errcode;
+        $res_data = json_decode($res->data);
+        if (isset($res_data->errcode)){
+            $res->E_code = $res_data->errcode;
             return $res;
         }
-
-        $res->E_code = 0;
-        $res->timestamp = time();
-        $res->expires_time = $res->timestamp + 7200;
-
+        $res_data->timestamp = time();
+        $res_data->expires_time = $res_data->timestamp + 7200;
+        $result->E_code = 0;
+        $result->DATA = $res_data;
         //  写入数据
-        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res));
+        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res_data));
 
-        return $res;
-
+        return $result;
     }
 
     /**
@@ -58,7 +69,7 @@ class SaoBasic {
      *        可设置默认值, 无默认值且字段不存在时,返回 false
      * @return array|bool
      */
-    protected function verField(array $data,array $fields)
+    public function verField(array $data,array $fields)
     {
         $res = [];
         foreach ($fields as $k => $v) {
@@ -72,13 +83,11 @@ class SaoBasic {
             if (isset($data[$field])){
                 $res[$field] = $data[$field];
             }elseif($default == null){
-                $res['res'] = $field;
-                return $res;
+                return false;
             }else{
                 $res[$field] = $default;
             }
         }
-        $res['res'] = 'success';
         return $res;
     }
 

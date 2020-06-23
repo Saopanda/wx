@@ -53,36 +53,61 @@ class AppService extends SaoBasic
 
     /**
      * 解密小程序用户信息
-     * @param $rawData
-     * @param $signature
-     * @param $encryptedData
-     * @param $iv
-     * @param $session_key
+     * @param $data
      * @return mixed
      */
-    public function getUserInfo($rawData,$signature,$encryptedData,$iv,$session_key)
+    public function getUserInfo($data)
     {
-        //  数据签名校验
-        $server_signature = sha1($rawData.$session_key);
+        $data = $this->verField($data,['rawData','signature','encryptedData','iv','session_key']);
         $result = $this->result;
-        if ($server_signature != $signature) {
+        if (!$data){
+            $result->E_code = '50511';
+            $result->E_msg = '缺少必要参数';
+            return $result;
+        }
+        //  数据签名校验
+        $server_signature = sha1($data['rawData'].$data['session_key']);
+        if ($server_signature != $data['signature']) {
             $result->E_code = '50011';
             $result->E_msg = '签名验证失败';
             return $result;
         }
         //  加密数据解密
-        $res = new WXBizDataCrypt($this->appid,$session_key);
-        $res = $res->decryptData($encryptedData,$iv,$data);
+        $res = new WXBizDataCrypt($this->appid,$data['session_key']);
+        $res = $res->decryptData($data['encryptedData'],$data['iv'],$res_data);
 
         if ($res != 0){
             $result->E_code = $res;
             $result->E_msg = '密文解密失败';
             return $result;
         }
-        $data = json_decode($data);
-        $data->E_code = 0;
+        $result->DATA = json_decode($res_data,true);
+        $result->E_code = 0;
 
-        return $data;
+        return $result;
+    }
+
+    /**
+     * 解密用户手机号
+     * @param $encryptedData
+     * @param $iv
+     * @param $session_key
+     * @return mixed
+     */
+    public function getUserPhone($encryptedData,$iv,$session_key)
+    {
+        $res = new WXBizDataCrypt($this->appid,$session_key);
+        $res = $res->decryptData($encryptedData,$iv,$res_data);
+        $result = $this->result;
+        if ($res != 0){
+            $result->E_code = $res;
+            $result->E_msg = '密文解密失败';
+            return $result;
+        }
+        $result->DATA = json_decode($res_data);
+        $result->E_code = 0;
+
+        return $result;
     }
 
     /**
@@ -98,7 +123,7 @@ class AppService extends SaoBasic
             return $res;
         }
         $url = $this->url2.'/getwxacodeunlimit';
-        $params['access_token'] = $res->access_token;
+        $params['access_token'] = $res->DATA->access_token;
 
         $data['json'] = [
             'scene'=>$scene,
@@ -178,32 +203,34 @@ class AppService extends SaoBasic
         $params['access_token'] = $res->access_token;
 
         $data['json'] = [
-                'media_url'=>$checkUrl,
-                'media_type'=>$type
-            ];
+            'media_url'=>$checkUrl,
+            'media_type'=>$type
+        ];
 
         $res = Clinet::new()->post($url,$data,$params);
         return $this->resPak($res);
     }
 
     /**
-     * 打包返回对象
+     * 微信部分接口打包返回对象
      * @param $res
      * @return mixed
      */
-    protected function resPak($res)
+    protected function resPak($res,$array=false)
     {
         if ($res->E_code != 0) {
             return $res;
         }
         //  通讯成功
-        $rs = json_decode($res->data);
-        if (isset($rs->errcode)){
-            $rs->E_code = $rs->errcode;
+        $result = $this->result;
+        $result->DATA = json_decode($res->data,$array);
+        if (isset($result->DATA->errcode)){
+            $result->E_code = $result->DATA->errcode;
+            $result->E_msg = $result->DATA->errmsg;
         }else{
-            $rs->E_code = 0;
+            $result->E_code = 0;
         }
-        return $rs;
+        return $result;
     }
 
 }
