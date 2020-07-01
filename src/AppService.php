@@ -142,6 +142,34 @@ class AppService extends SaoBasic
         }
     }
 
+    //  小程序二维码
+    public function getQR2code($path='pages/index/index',$m_params=array())
+    {
+        $res = $this->getAccessToken($this->appid,$this->secret);
+        if ($res->E_code != 0) {
+            return $res;
+        }
+        $url = 'https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode';
+        $params['access_token'] = $res->DATA->access_token;
+
+        $data['json'] = [
+            'path'=>$path,
+        ];
+
+        $data['json'] = array_merge( $data['json'],$m_params);
+
+        $res = Clinet::new()->post($url,$data,$params);
+        $rs = json_decode($res->data);
+
+        if (is_null($rs)){
+            $res->E_code = 0;
+            return $res;
+        }else{
+            $rs->E_code = $rs->errcode;
+            return $rs;
+        }
+    }
+
     /**
      * 微信文字检测   同步
      * @param $msg
