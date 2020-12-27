@@ -5,7 +5,7 @@
  *
  * @copyright Copyright (c) 1998-2014 Tencent Inc.
  */
-namespace saowx\lib;
+namespace saopanda\lib;
 
 class WXBizDataCrypt
 {

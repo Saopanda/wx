@@ -1,36 +1,36 @@
 <?php
 
-namespace saowx;
+namespace saopanda;
 
-use saowx\lib\SaoBasic;
-use saowx\lib\WXBizDataCrypt;
-use saowx\lib\Clinet;
+use saopanda\lib\basic;
+use saopanda\lib\WXBizDataCrypt;
+use saopanda\client;
 
-class AppService extends SaoBasic
+class App extends basic
 {
-    protected $appid,$secret,$result,$messageToken,$messageKey;
+    protected $appid,$secret,$messageToken,$messageKey;
+    private static $instance;
 
     #   小程序登陆
     protected $url = 'https://api.weixin.qq.com/sns';
     #   内容审查
     protected $url2 = 'https://api.weixin.qq.com/wxa';
 
-    public function __construct($appid,$secret,$messageToken,$messageKey)
+    public static function new($appid,$secret,$messageToken=null,$messageKey=null)
+    {
+        if(is_null(self::$instance))
+        {
+            self::$instance = new self($appid,$secret,$messageToken,$messageKey);
+        }
+        return self::$instance;
+    }
+
+    public function __construct($appid,$secret,$messageToken=null,$messageKey=null)
     {
         $this->appid = $appid;
         $this->secret = $secret;
         $this->messageToken = $messageToken;
         $this->messageKey = $messageKey;
-        $this->result = new \stdClass();
-    }
-
-    //  微信消息服务入口 待完成
-    public function message()
-    {
-        if (is_null($this->messageToken) ||is_null($this->messageKey) ){
-            return $this;
-        }
-        return  MesService::new($this->messageToken,$this->messageKey);
     }
 
     /**
@@ -47,44 +47,48 @@ class AppService extends SaoBasic
             'js_code'=>$code,
             'grant_type'=>'authorization_code'
         ];
-        $res = Clinet::new()->get($url,$params);
-        return $this->resPak($res);
+        $res = client::new()->get($url,$params);
+        if ($res['result']){
+            $res['result'] = json_decode($res['result']);
+        }
+        return $res;
     }
 
     /**
      * 解密小程序用户信息
-     * @param $data
+     * @param $data 'rawData','signature','encryptedData','iv'
+     * @param $session_key
      * @return mixed
+     * @throws
      */
-    public function getUserInfo($data)
+    public function getUserInfo(array $data,$session_key)
     {
-        $data = $this->verField($data,['rawData','signature','encryptedData','iv','session_key']);
-        $result = $this->result;
-        if (!$data){
-            $result->E_code = '50511';
-            $result->E_msg = '缺少必要参数';
-            return $result;
-        }
-        //  数据签名校验
-        $server_signature = sha1($data['rawData'].$data['session_key']);
+        $this->Field($data,['rawData','signature','encryptedData','iv']);
+
+        $server_signature = sha1($data['rawData'].$session_key);
         if ($server_signature != $data['signature']) {
-            $result->E_code = '50011';
-            $result->E_msg = '签名验证失败';
-            return $result;
+            return [
+                'result'    =>  false,
+                'errmsg'    =>  "签名验证失败",
+                'errcode'   =>  6001
+            ];
         }
-        //  加密数据解密
-        $res = new WXBizDataCrypt($this->appid,$data['session_key']);
+
+        $res = new WXBizDataCrypt($this->appid,$session_key);
         $res = $res->decryptData($data['encryptedData'],$data['iv'],$res_data);
 
         if ($res != 0){
-            $result->E_code = $res;
-            $result->E_msg = '密文解密失败';
-            return $result;
+            return [
+                'result'    =>  false,
+                'errmsg'    =>  "密文解密失败",
+                'errcode'   =>  $res
+            ];
         }
-        $result->DATA = json_decode($res_data,true);
-        $result->E_code = 0;
-
-        return $result;
+        return [
+            'result'    =>  json_decode($res_data,true),
+            'errmsg'    =>  "",
+            'errcode'   =>  0
+        ];
     }
 
     /**

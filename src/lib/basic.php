@@ -1,8 +1,8 @@
 <?php
 
-namespace saowx\lib;
+namespace saopanda\lib;
 
-class SaoBasic {
+class basic {
 
     //  文件流转文件
     public function saveToFile($string,$path,$name=null)
@@ -63,32 +63,18 @@ class SaoBasic {
     }
 
     /**
-     * 字段验证提取器
+     * 字段验证
      * @param array $data
-     * @param array $fields [ 'a'=>'default' , 'b' ]
-     *        可设置默认值, 无默认值且字段不存在时,返回 false
-     * @return array|bool
+     * @param array $fields
+     * @throws
      */
-    public function verField(array $data,array $fields)
+    public function Field(array $data,array $fields)
     {
-        $res = [];
         foreach ($fields as $k => $v) {
-            if (is_numeric($k)){
-                $field = $v;
-                $default = null;
-            }else{
-                $field = $k;
-                $default = $v;
-            }
-            if (isset($data[$field])){
-                $res[$field] = $data[$field];
-            }elseif($default == null){
-                return false;
-            }else{
-                $res[$field] = $default;
+            if (!isset($data[$v])){
+                throw new \Exception('DATA缺少'.$v);
             }
         }
-        return $res;
     }
 
     /**
