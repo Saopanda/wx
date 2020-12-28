@@ -4,10 +4,10 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c378948afa88ab6237701473b14f843",
+    "content-hash": "ddf9851edc449f71a570c9021dc5cbf0",
     "packages": [
         {
-            "name": "saoapnda/client",
+            "name": "saopanda/client",
             "version": "v2.0",
             "source": {
                 "type": "git",
