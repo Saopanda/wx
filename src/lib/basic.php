@@ -5,7 +5,7 @@ namespace saopanda\lib;
 class basic {
 
     //  文件流转文件
-    public function saveToFile($string,$path,$name=null)
+    protected function saveToFile($string,$path,$name=null)
     {
         $name=null ? $name="file_".uniqid():$name;
         $file = fopen("./".$path.$name,"w");
@@ -68,7 +68,7 @@ class basic {
      * @param array $fields
      * @throws
      */
-    public function Field(array $data,array $fields)
+    protected static function Field(array $data,array $fields)
     {
         foreach ($fields as $k => $v) {
             if (!isset($data[$v])){

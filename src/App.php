@@ -37,13 +37,14 @@ class App extends basic
      * 小程序登陆
      * @param $code
      * @return mixed
+     * @throws
      */
-    public function login($code)
+    public static function login($code)
     {
-        $url = $this->url.'/jscode2session';
+        $url = self::$instance->url.'/jscode2session';
         $params = [
-            'appid'=>$this->appid,
-            'secret'=>$this->secret,
+            'appid'=>self::$instance->appid,
+            'secret'=>self::$instance->secret,
             'js_code'=>$code,
             'grant_type'=>'authorization_code'
         ];
@@ -61,9 +62,9 @@ class App extends basic
      * @return mixed
      * @throws
      */
-    public function getUserInfo(array $data,$session_key)
+    public static function getUserInfo(array $data,$session_key)
     {
-        $this->Field($data,['rawData','signature','encryptedData','iv']);
+        self::$instance->Field($data,['rawData','signature','encryptedData','iv']);
 
         $server_signature = sha1($data['rawData'].$session_key);
         if ($server_signature != $data['signature']) {
@@ -74,7 +75,7 @@ class App extends basic
             ];
         }
 
-        $res = new WXBizDataCrypt($this->appid,$session_key);
+        $res = new WXBizDataCrypt(self::$instance->appid,$session_key);
         $res = $res->decryptData($data['encryptedData'],$data['iv'],$res_data);
 
         if ($res != 0){
