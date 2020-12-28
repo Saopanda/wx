@@ -4,20 +4,20 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "ddf9851edc449f71a570c9021dc5cbf0",
+    "content-hash": "0ae247cfeeb5aeeb7b00375b7d57578a",
     "packages": [
         {
             "name": "saopanda/client",
-            "version": "v2.0",
+            "version": "v2.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/Saopanda/simpleRequest.git",
-                "reference": "bd94db18355de9c84cdc5e091c888fcd49d7f03f"
+                "reference": "bce29328b9d3522e163d93a68c08d30cdace496f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Saopanda/simpleRequest/zipball/bd94db18355de9c84cdc5e091c888fcd49d7f03f",
-                "reference": "bd94db18355de9c84cdc5e091c888fcd49d7f03f",
+                "url": "https://api.github.com/repos/Saopanda/simpleRequest/zipball/bce29328b9d3522e163d93a68c08d30cdace496f",
+                "reference": "bce29328b9d3522e163d93a68c08d30cdace496f",
                 "shasum": "",
                 "mirrors": [
                     {
@@ -48,9 +48,9 @@
             "description": "简单的请求类",
             "support": {
                 "issues": "https://github.com/Saopanda/simpleRequest/issues",
-                "source": "https://github.com/Saopanda/simpleRequest/tree/v2.0"
+                "source": "https://github.com/Saopanda/simpleRequest/tree/v2.1"
             },
-            "time": "2020-12-27T12:53:37+00:00"
+            "time": "2020-12-28T01:54:26+00:00"
         }
     ],
     "packages-dev": [],
