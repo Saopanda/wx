@@ -4,12 +4,9 @@ namespace saopanda;
 
 use saopanda\lib\basic;
 use saopanda\lib\WXBizDataCrypt;
-use saopanda\client;
 
 class App extends basic
 {
-    protected $appid,$secret,$messageToken,$messageKey;
-    private static $instance;
 
     #   小程序登陆
     protected $url = 'https://api.weixin.qq.com/sns';
@@ -25,13 +22,6 @@ class App extends basic
         return self::$instance;
     }
 
-    public function __construct($appid,$secret,$messageToken=null,$messageKey=null)
-    {
-        $this->appid = $appid;
-        $this->secret = $secret;
-        $this->messageToken = $messageToken;
-        $this->messageKey = $messageKey;
-    }
 
     /**
      * 小程序登陆
@@ -49,10 +39,7 @@ class App extends basic
             'grant_type'=>'authorization_code'
         ];
         $res = client::new()->get($url,$params);
-        if ($res['result']){
-            $res['result'] = json_decode($res['result']);
-        }
-        return $res;
+        return self::$instance->checkError($res);
     }
 
     /**
@@ -90,6 +77,29 @@ class App extends basic
             'errmsg'    =>  "",
             'errcode'   =>  0
         ];
+    }
+
+    /**
+     * 微信文字检测   同步
+     * @param $msg
+     * @return false|mixed|string
+     */
+    public static function checkTextSync($msg)
+    {
+        $url = self::$instance->url2.'/msg_sec_check';
+        $accessToken = self::getAccessToken();
+
+        if (!$accessToken['result']) {
+            return $accessToken;
+        }
+
+        $params['access_token'] = $accessToken['result']['access_token'];
+        $data = ['content'=>$msg];
+
+        $rs = client::new()->jsonData($data)
+            ->post($url,$params);
+
+        return self::$instance->checkError($rs);
     }
 
     /**
@@ -175,27 +185,7 @@ class App extends basic
         }
     }
 
-    /**
-     * 微信文字检测   同步
-     * @param $msg
-     * @return false|mixed|\stdClass|string
-     */
-    public function checkText($msg)
-    {
-        $url = $this->url2.'/msg_sec_check';
 
-        $res = $this->getAccessToken($this->appid,$this->secret);
-        if ($res->E_code != 0) {
-            return $res;
-        }
-
-        $params['access_token'] = $res->access_token;
-        $data['json'] = ['content'=>$msg];
-        $data['headers'] = ['coasdasdasd'];
-
-        $res = Clinet::new()->post($url,$data,$params);
-        return $this->resPak($res);
-    }
 
     /**
      * 微信图片检测   同步

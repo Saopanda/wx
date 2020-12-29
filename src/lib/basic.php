@@ -2,7 +2,20 @@
 
 namespace saopanda\lib;
 
+use saopanda\client;
+
 class basic {
+
+    protected static $instance;
+    protected $appid,$secret,$messageToken,$messageKey;
+
+    public function __construct($appid,$secret,$messageToken=null,$messageKey=null)
+    {
+        $this->appid = $appid;
+        $this->secret = $secret;
+        $this->messageToken = $messageToken;
+        $this->messageKey = $messageKey;
+    }
 
     //  文件流转文件
     protected function saveToFile($string,$path,$name=null)
@@ -16,50 +29,61 @@ class basic {
 
     /**
      * 获取 access_token
-     * @param $appid
-     * @param $secret
      * @param bool $refresh
      * @return false|mixed|string
      */
-    protected function getAccessToken($appid, $secret, $refresh = false)
+    public static function getAccessToken($refresh = false)
     {
         $rs = @file_get_contents(dirname(__FILE__).'/access_token');
-        $rs = json_decode($rs);
-        $result = $this->result;
+        $rs = json_decode($rs,true);
 
-        if (isset($rs->expires_time) && !$refresh) {
-            if ($rs->expires_time > time()+120) {
-                $result->DATA = $rs;
-                $result->E_code = 0;
-                return $result;
+        if (isset($rs['expires_time']) && !$refresh) {
+            if ($rs['expires_time'] > time()+120) {
+                return [
+                    'result' => $rs,
+                    "errmsg"  => "",
+                    "errcode" => 0
+                ];
             }
         }
 
         $url = 'https://api.weixin.qq.com/cgi-bin/token';
         $params = [
             'grant_type'=>'client_credential',
-            'appid'=>$appid,
-            'secret'=>$secret,
+            'appid'=>self::$instance->appid,
+            'secret'=>self::$instance->secret,
         ];
 
-        $res = Clinet::new()->get($url,$params);
-        if ($res->E_code != 0) {
+        $res = client::new()->get($url,$params);
+        $res = self::$instance->checkError($res);
+        if (!$res['result']) {
             return $res;
         }
-        //  通讯成功
-        $res_data = json_decode($res->data);
-        if (isset($res_data->errcode)){
-            $res->E_code = $res_data->errcode;
-            return $res;
-        }
-        $res_data->timestamp = time();
-        $res_data->expires_time = $res_data->timestamp + 7200;
-        $result->E_code = 0;
-        $result->DATA = $res_data;
+        $res['result']['timestamp'] = time();
+        $res['result']['expires_time'] = $res['result']['timestamp'] + 7200;
         //  写入数据
-        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res_data));
+        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res['result']));
 
-        return $result;
+        return $res;
+    }
+
+
+    protected function checkError($client)
+    {
+        if (!$client['result']) {
+            return $client;
+        }
+        $data = json_decode($client['result'], true);
+        if (isset($data['errcode'])) {
+            $client = [
+                'result'    =>  false,
+                "errmsg"  => $data['errmsg'],
+                "errcode" => $data['errcode']
+            ];
+            return $client;
+        }
+        $client['result'] = $data;
+        return $client;
     }
 
     /**
