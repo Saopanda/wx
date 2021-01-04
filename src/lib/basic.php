@@ -2,17 +2,24 @@
 
 namespace saopanda\lib;
 
-use saopanda\client;
 
 class basic {
 
-    protected static $instance;
+    protected static $app,$pay,$pay3;
     protected $appid,$secret,$messageToken,$messageKey;
+    protected $mchId,$mchKey,$notify_url,$mchCert,$mchCertKey,$currency;
 
-    public function __construct($appid,$secret,$messageToken=null,$messageKey=null)
+    public function __construct($appid,$secret,$mchId,$mchKey,$notify_url,
+        $currency,$mchCert,$mchCertKey,$messageToken,$messageKey)
     {
         $this->appid = $appid;
         $this->secret = $secret;
+        $this->mchId = $mchId;
+        $this->mchKey = $mchKey;
+        $this->notify_url = $notify_url;
+        $this->currency = $currency;
+        $this->mchCert = $mchCert;
+        $this->mchCertKey = $mchCertKey;
         $this->messageToken = $messageToken;
         $this->messageKey = $messageKey;
     }
@@ -26,47 +33,6 @@ class basic {
         fclose($file);
         return $path.$name;
     }
-
-    /**
-     * 获取 access_token
-     * @param bool $refresh
-     * @return false|mixed|string
-     */
-    public static function getAccessToken($refresh = false)
-    {
-        $rs = @file_get_contents(dirname(__FILE__).'/access_token');
-        $rs = json_decode($rs,true);
-
-        if (isset($rs['expires_time']) && !$refresh) {
-            if ($rs['expires_time'] > time()+120) {
-                return [
-                    'result' => $rs,
-                    "errmsg"  => "",
-                    "errcode" => 0
-                ];
-            }
-        }
-
-        $url = 'https://api.weixin.qq.com/cgi-bin/token';
-        $params = [
-            'grant_type'=>'client_credential',
-            'appid'=>self::$instance->appid,
-            'secret'=>self::$instance->secret,
-        ];
-
-        $res = client::new()->get($url,$params);
-        $res = self::$instance->checkError($res);
-        if (!$res['result']) {
-            return $res;
-        }
-        $res['result']['timestamp'] = time();
-        $res['result']['expires_time'] = $res['result']['timestamp'] + 7200;
-        //  写入数据
-        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res['result']));
-
-        return $res;
-    }
-
 
     protected function checkError($client)
     {

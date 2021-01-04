@@ -15,13 +15,13 @@ class App extends basic
 
     public static function new($appid,$secret,$messageToken=null,$messageKey=null)
     {
-        if(is_null(self::$instance))
+        if(is_null(self::$app))
         {
-            self::$instance = new self($appid,$secret,$messageToken,$messageKey);
+            self::$app = new self($appid,$secret,null,null,null,null,
+                null,null,$messageToken,$messageKey);
         }
-        return self::$instance;
+        return self::$app;
     }
-
 
     /**
      * 小程序登陆
@@ -31,15 +31,15 @@ class App extends basic
      */
     public static function login($code)
     {
-        $url = self::$instance->url.'/jscode2session';
+        $url = self::$app->url.'/jscode2session';
         $params = [
-            'appid'=>self::$instance->appid,
-            'secret'=>self::$instance->secret,
+            'appid'=>self::$app->appid,
+            'secret'=>self::$app->secret,
             'js_code'=>$code,
             'grant_type'=>'authorization_code'
         ];
         $res = client::new()->get($url,$params);
-        return self::$instance->checkError($res);
+        return self::$app->checkError($res);
     }
 
     /**
@@ -51,7 +51,7 @@ class App extends basic
      */
     public static function getUserInfo(array $data,$session_key)
     {
-        self::$instance->Field($data,['rawData','signature','encryptedData','iv']);
+        self::$app->Field($data,['rawData','signature','encryptedData','iv']);
 
         $server_signature = sha1($data['rawData'].$session_key);
         if ($server_signature != $data['signature']) {
@@ -62,7 +62,7 @@ class App extends basic
             ];
         }
 
-        $res = new WXBizDataCrypt(self::$instance->appid,$session_key);
+        $res = new WXBizDataCrypt(self::$app->appid,$session_key);
         $res = $res->decryptData($data['encryptedData'],$data['iv'],$res_data);
 
         if ($res != 0){
@@ -86,7 +86,7 @@ class App extends basic
      */
     public static function checkTextSync($msg)
     {
-        $url = self::$instance->url2.'/msg_sec_check';
+        $url = self::$app->url2.'/msg_sec_check';
         $accessToken = self::getAccessToken();
 
         if (!$accessToken['result']) {
@@ -99,7 +99,7 @@ class App extends basic
         $rs = client::new()->jsonData($data)
             ->post($url,$params);
 
-        return self::$instance->checkError($rs);
+        return self::$app->checkError($rs);
     }
 
     /**
@@ -254,6 +254,46 @@ class App extends basic
             $result->E_code = 0;
         }
         return $result;
+    }
+
+    /**
+     * 获取 access_token
+     * @param bool $refresh
+     * @return false|mixed|string
+     */
+    public static function getAccessToken($refresh = false)
+    {
+        $rs = @file_get_contents(dirname(__FILE__).'/access_token');
+        $rs = json_decode($rs,true);
+
+        if (isset($rs['expires_time']) && !$refresh) {
+            if ($rs['expires_time'] > time()+120) {
+                return [
+                    'result' => $rs,
+                    "errmsg"  => "",
+                    "errcode" => 0
+                ];
+            }
+        }
+
+        $url = 'https://api.weixin.qq.com/cgi-bin/token';
+        $params = [
+            'grant_type'=>'client_credential',
+            'appid'=>self::$app->appid,
+            'secret'=>self::$app->secret,
+        ];
+
+        $res = client::new()->get($url,$params);
+        $res = self::$app->checkError($res);
+        if (!$res['result']) {
+            return $res;
+        }
+        $res['result']['timestamp'] = time();
+        $res['result']['expires_time'] = $res['result']['timestamp'] + 7200;
+        //  写入数据
+        file_put_contents(dirname(__FILE__).'/access_token',json_encode($res['result']));
+
+        return $res;
     }
 
 }

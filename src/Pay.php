@@ -1,69 +1,131 @@
 <?php
 
-namespace saowx;
+namespace saopanda;
 
-use saowx\lib\SaoBasic;
-use saowx\lib\Clinet;
+use saopanda\lib\basic;
 
-
-class PayService extends SaoBasic
+class Pay extends basic
 {
-    protected $appid,$mchId,$mchKey,$notify_url,$mchCert,$mchCertKey,$trade_type;
 
-    public $result;
+    protected $url = 'https://api.mch.weixin.qq.com/pay/';
+    protected $urlV3 = 'https://api.mch.weixin.qq.com/v3/pay/transactions/';
 
-    protected $url = 'https://api.mch.weixin.qq.com/pay';
 
-    public function __construct($appid,$mchId,$mchKey,$notify_url,$trade_type,$mchCert,$mchCertKey)
+    /**
+     * @param $appid    //  商户绑定的微信应用
+     * @param $mchId    //  商户ID
+     * @param $mchKey   //  商户密钥
+     * @param $notify_url   //  结果回调地址
+     * @param null $mchCert     //  证书
+     * @param null $mchCertKey  //  证书密钥
+     * @return Pay
+     */
+    public static function new($appid,$mchId,$mchKey,$notify_url,$mchCert=null,$mchCertKey=null)
     {
-        $this->appid = $appid;
-        $this->mchId = $mchId;
-        $this->mchKey = $mchKey;
-        $this->notify_url = $notify_url;
-        $this->mchCert = $mchCert;
-        $this->mchCertKey = $mchCertKey;
-        $this->trade_type = $trade_type;
-        $this->result = new \stdClass();
+        if(is_null(self::$pay))
+        {
+            self::$pay = new self($appid,null,$mchId,$mchKey,$notify_url,null,$mchCert
+            ,$mchCertKey,null,null);
+        }
+        return self::$pay;
+    }
+    /**
+     * @param $appid    //  商户绑定的微信应用
+     * @param $mchId    //  商户ID
+     * @param $mchKey   //  商户密钥
+     * @param $notify_url   //  结果回调地址
+     * @param string $currency  //  币种
+     * @param null $mchCert     //  证书
+     * @param null $mchCertKey  //  证书密钥
+     * @return Pay
+     */
+    public static function newV3($appid,$mchId,$mchKey,$notify_url,$currency='CNY',$mchCert=null,$mchCertKey=null)
+    {
+        if(is_null(self::$pay3))
+        {
+            self::$pay3 = new self($appid,null,$mchId,$mchKey,$notify_url,$currency,$mchCert
+            ,$mchCertKey,null,null);
+        }
+        return self::$pay3;
     }
 
     /**
-     * 微信统一下单
+     * 统一下单 v2
      *
+     * @param $type         //  JSAPI 小程序 ｜NATIVE ｜APP ｜MWEB
      * @param $openid       //  谁的订单
      * @param $body         //  什么东西
      * @param $total_fee    //  多少钱
-     * @param $out_trade_no //  订单号
-     * @param $m_params     //  可选参数 见微信支付文档
+     * @param $out_trade_no //  自定义订单号
+     * @param $m_params     //  其他参数见微信支付文档v2
      * @return array|mixed
      */
-    public function order($openid,$body,$total_fee,$out_trade_no,array $m_params=array())
+    public static function order($type,$openid,$body,$total_fee,$out_trade_no,array $m_params=array())
     {
         $data = [
             'openid'=>$openid,
             'body'=>$body,
             'total_fee'=>$total_fee,
             'out_trade_no'=>$out_trade_no,
-            'notify_url'=>$this->notify_url,
+            'notify_url'=>self::$pay->notify_url,
+            'appid'=>self::$pay->appid,
+            'trade_type'=>$type,
+            'mch_id'=>self::$pay->mchId,
+            'spbill_create_ip'=>'1.1.1.1',
+            'nonce_str'=>self::$pay->nonce_str(),
+        ];
+
+        $data = array_merge($data,$m_params);
+        $data['sign'] = self::$pay->mchSign($data,self::$pay->mchKey);
+        $data = self::$pay->arrayToXml($data);
+
+        $url = self::$pay->url.'unifiedorder';
+
+        $res = client::new()->rawData($data)->post($url);
+        if ($res['result']){
+            $res['result'] = self::$pay->xmlToArray($res['result']);
+            if (isset($res['result']['result_code'])){
+                if ($res['result']['result_code'] != 'SUCCESS'){
+                    $res['errcode'] = 99;
+                    $res['errmsg'] = $res['result']['err_code_des'];
+                }
+            }else{
+                $res['errcode'] = 98;
+                $res['errmsg'] = $res['result']['return_msg'];
+            }
+        }
+        return $res;
+    }
+
+    protected function orderV3($type,$openid,$description,$total,$out_trade_no, $m_params=array())
+    {
+        $data = [
             'appid'=>$this->appid,
+            'mchid'=>$this->mchId,
+            'description'=>$description,
+            'out_trade_no'=>$out_trade_no,
+            'notify_url'=>$this->notify_url,
+            'amount'=>[
+                'total' => $total,
+                'currency'=>$this->currency
+            ],
+            'payer' =>  [
+                'openid'=>$openid
+            ],
             'trade_type'=>$this->trade_type,
-            'mch_id'=>$this->mchId,
             'spbill_create_ip'=>'1.1.1.1',
             'nonce_str'=>$this->nonce_str(),
         ];
 
         $data = array_merge($data,$m_params);
-        $data['sign'] = $this->mchSign($data,$this->mchKey);
-        $data = $this->arrayToXml($data);
+        $data['sign'] = $this->mchSign($data,self::$pay->mchKey);
 
-        $url = $this->url.'/unifiedorder';
-        $data = [ 'raw' => $data ];
+        $url = self::$pay->url.$type;
 
-        $res = Clinet::new()->post($url,$data);
-
-        if ($res->E_code == 0) {
-            $res->data = $this->xmlToArray($res->data);
-        }
-        return $res;
+        return client::new()
+            ->headers(['Accept: application/json','User-Agent: PC'])
+            ->jsonData($data)
+            ->post($url);
     }
 
     /**
