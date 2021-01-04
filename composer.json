@@ -4,7 +4,7 @@
     "type": "library",
     "require": {
         "php": ">=7.1.3",
-        "saopanda/client": "2.1"
+        "saopanda/client": ">=2.2"
     },
     "autoload":{
         "psr-4":{
