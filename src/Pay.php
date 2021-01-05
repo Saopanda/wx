@@ -88,6 +88,14 @@ class Pay extends basic
                 if ($res['result']['result_code'] != 'SUCCESS'){
                     $res['errcode'] = 99;
                     $res['errmsg'] = $res['result']['err_code_des'];
+                }else{
+                    $sign['appId'] = self::$pay->appid;
+                    $sign['timeStamp'] = time();
+                    $sign['nonceStr'] = self::$pay->nonce_str();
+                    $sign['package'] = 'prepay_id='.$res['result']['prepay_id'];
+                    $sign['signType'] = 'MD5';
+                    $sign['sign'] = self::$pay->mchSign($sign,self::$pay->mchKey);
+                    $res['result'] = $sign;
                 }
             }else{
                 $res['errcode'] = 98;
