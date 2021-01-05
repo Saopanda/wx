@@ -90,7 +90,7 @@ class Pay extends basic
                     $res['errmsg'] = $res['result']['err_code_des'];
                 }else{
                     $sign['appId'] = self::$pay->appid;
-                    $sign['timeStamp'] = time();
+                    $sign['timeStamp'] = (string)time();
                     $sign['nonceStr'] = self::$pay->nonce_str();
                     $sign['package'] = 'prepay_id='.$res['result']['prepay_id'];
                     $sign['signType'] = 'MD5';
