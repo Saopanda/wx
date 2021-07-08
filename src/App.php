@@ -283,7 +283,7 @@ class App extends basic
             'secret'=>self::$app->secret,
         ];
 
-        $res = client::new()->get($url,$params);
+        $res = Client::new()->get($url,$params);
         $res = self::$app->checkError($res);
         if (!$res['result']) {
             return $res;

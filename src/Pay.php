@@ -95,7 +95,7 @@ class Pay extends basic
                     $sign['package'] = 'prepay_id='.$res['result']['prepay_id'];
                     $sign['signType'] = 'MD5';
                     $sign['sign'] = self::$pay->mchSign($sign,self::$pay->mchKey);
-                    $res['result'] = $sign;
+                    $res['result']['signs'] = $sign;
                 }
             }else{
                 $res['errcode'] = 98;
